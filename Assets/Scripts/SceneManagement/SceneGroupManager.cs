@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 using UnityEngine;
 
@@ -17,7 +19,7 @@ namespace Systems.SceneManagement
 
         SceneGroup ActiveSceneGroup;
 
-        public async Task LoadScenes(SceneGroup group, IProgress<float> progress, bool reloadDupScenes = false)
+        public async UniTask LoadScenes(SceneGroup group, IProgress<float> progress, bool reloadDupScenes = false)
         {
             ActiveSceneGroup = group;
             var loadedScenes = new List<string>();
@@ -43,7 +45,7 @@ namespace Systems.SceneManagement
 
                 var operation = SceneManager.LoadSceneAsync(sceneData.Reference.Path, LoadSceneMode.Additive);
 
-                await Task.Delay(TimeSpan.FromSeconds(2.5f));   //TODO debug remove me
+                await UniTask.Delay(TimeSpan.FromSeconds(2.5f));   //TODO debug remove me
 
                 operationGroup.Operations.Add(operation);
 
@@ -54,7 +56,7 @@ namespace Systems.SceneManagement
             while(!operationGroup.IsDone)
             {
                 progress?.Report(operationGroup.Progress);
-                await Task.Delay(100);
+                await UniTask.Delay(100);
             }
 
             Scene activeScene = SceneManager.GetSceneByName(ActiveSceneGroup.FindSceneNameByType(SceneType.ActiveScene));
@@ -67,7 +69,7 @@ namespace Systems.SceneManagement
             OnSceneGroupLoaded.Invoke();
         }
 
-        public async Task UnloadScenes()
+        public async UniTask UnloadScenes()
         {
             var scenes = new List<string>();
             var activeScene = SceneManager.GetActiveScene().name;
@@ -101,10 +103,10 @@ namespace Systems.SceneManagement
             // Wait until all AsyncOperations in the group are done
             while(!operationGroup.IsDone)
             {
-                await Task.Delay(100);
+                await UniTask.Delay(100);
             }
 
-            await Resources.UnloadUnusedAssets();
+            await Resources.UnloadUnusedAssets().ToUniTask();
         }
     }
 

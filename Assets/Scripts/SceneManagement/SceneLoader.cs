@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,7 +29,13 @@ namespace Systems.SceneManagement
             manager.OnSceneGroupLoaded += () => Debug.Log("Scene Group Loaded");
         }
 
-        async void Start()
+        void Start()
+        {
+            Init().Forget();
+            //await LoadSceneGroup(0);
+        }
+
+        async UniTaskVoid Init()
         {
             await LoadSceneGroup(0);
         }
@@ -45,7 +51,7 @@ namespace Systems.SceneManagement
             loadingBar.fillAmount = Mathf.Lerp(currentFillAmount, targetProgress, Time.deltaTime * dynamicFillSpeed);
         }
 
-        public async Task LoadSceneGroup(int index)
+        public async UniTask LoadSceneGroup(int index)
         {
             loadingBar.fillAmount = 0f;
             targetProgress = 1f;
